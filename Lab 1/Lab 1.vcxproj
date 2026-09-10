@@ -139,9 +139,15 @@
     </Manifest>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="Book.cpp" />
-    <ClCompile Include="El_book.cpp" />
-    <ClCompile Include="Person.cpp" />
+    <ClInclude Include="Book.h" />
+    <ClInclude Include="LibraryManager.h" />
+    <ClInclude Include="Reader.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="BookM.cpp" />
+    <ClCompile Include="LibraryManager.cpp" />
+    <ClCompile Include="Main.cpp" />
+    <ClCompile Include="Reader.cpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
