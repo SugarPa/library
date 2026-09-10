@@ -18,13 +18,13 @@ bool Reader::get_has_book() const {
 	return has_book;
 }
 
-void Reader::set_name(const std::string& new_name) {
+void Reader::set_name(std::string_view new_name) {
 	if (!new_name.empty()) {
 		name = new_name;
 	}
 }
 
-void Reader::set_library_card(const std::string& new_library_card) {
+void Reader::set_library_card(std::string_view new_library_card) {
 	if (!new_library_card.empty()) {
 		library_card = new_library_card;
 	}

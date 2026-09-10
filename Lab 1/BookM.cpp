@@ -1,13 +1,13 @@
 #include "Book.h"
 
-Book::Book(int id, const std::string& title, const std::string& publisher, int year, unsigned short copies) :  publisher(publisher), title(title), id(id), year(year), copies(copies) {}
-
-std::string Book::get_title() const {
-	return title;
-}
+Book::Book(int id, const std::string& title, const std::string& publisher, int year, unsigned short copies): title(title), publisher(publisher), id(id), year(year), copies(copies) {}
 
 std::string Book::get_publisher() const {
 	return publisher;
+}
+
+std::string Book::get_title() const {
+	return title;
 }
 
 int Book::get_id() const {
@@ -22,13 +22,13 @@ unsigned short Book::get_copies() const {
 	return copies;
 }
 
-void Book::set_title(const std::string& new_title) {
+void Book::set_title(std::string_view new_title) {
 	if (!new_title.empty()) {
 		title = new_title;
 	}
 }
 
-void Book::set_publisher(const std::string& new_publisher) {
+void Book::set_publisher(std::string_view new_publisher) {
 	if (!new_publisher.empty()) {
 		publisher = new_publisher;
 	}

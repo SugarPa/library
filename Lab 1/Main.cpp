@@ -3,7 +3,7 @@
 #include <string>
 #include <locale.h>
 
-void print_menu() {
+static void print_menu() {
     std::cout << "\nМеню:\n1. Добавить книгу\n2. Показать все книги\n3. Найти книгу по ID\n4. Найти книгу по названию\n5. Зарегистрировать читателя\n6. Показать всех читателей\n7. Найти читателя по номеру билета\n8. Выдать книгу читателю\n9. Вернуть книгу";
     std::cout << "\n10. Статистика библиотеки\n11. Очистить все данные\n12. Удалить книгу\n13 Изменить информацию о читателе\n0. Выход\n\nВыберите действие: ";
 }
@@ -41,8 +41,7 @@ int main() {
             std::cout << "Введите ID книги: ";
             std::cin >> id;
 
-            Book* book = library.find_book_by_id(id);
-            if (book) {
+            if (const Book* book = library.find_book_by_id(id); book) {
                 std::cout << "\nНайдена книга:" << std::endl;
                 book->print_info();
             }
@@ -58,8 +57,7 @@ int main() {
             std::cout << "Введите название книги: ";
             std::getline(std::cin, title);
 
-            Book* book = library.find_book_by_title(title);
-            if (book) {
+            if (const Book* book = library.find_book_by_title(title); book) {
                 std::cout << "\nНайдена книга:" << std::endl;
                 book->print_info();
             }
@@ -85,8 +83,7 @@ int main() {
             std::cout << "Введите номер читательского билета: ";
             std::getline(std::cin, card);
 
-            Reader* reader = library.find_reader_by_card(card);
-            if (reader) {
+            if (const Reader* reader = library.find_reader_by_card(card); reader) {
                 std::cout << "\nНайден читатель:" << std::endl;
                 reader->print_info();
             }

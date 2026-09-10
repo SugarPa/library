@@ -13,8 +13,8 @@ public:
     std::string get_library_card() const;
     int get_borrowed_book_id() const;
     bool get_has_book() const;
-    void set_name(const std::string& new_name);
-    void set_library_card(const std::string& new_library_card);
+    void set_name(std::string_view new_name);
+    void set_library_card(std::string_view new_library_card);
     void set_borrowed_book_id(int new_id);
     void set_has_book(bool status);
     void borrow_book(int book_id);

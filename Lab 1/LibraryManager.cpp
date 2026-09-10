@@ -2,69 +2,76 @@
 #include <iostream>
 #include <limits>
 #include <algorithm>
+#include <string_view>
 
 LibraryManager::LibraryManager() : next_book_id(1), next_reader_id(1) {}
 
 Book LibraryManager::input_book_from_console() {
-	std::string title, publisher;
+	std::string title;
+	std::string publisher;
 	int year;
 	unsigned short copies;
+
 	std::cout << "Введите данные книг" << std::endl;
-	std::cin.ignore();
 	std::cout << "Название: ";
-	std::getline(std::cin, title);
-	if (title.empty()) {
-		std::cout << "Название не может быть пустым!\n Введите название ещё раз:" << std::endl;
-		while (title.empty()) {
-			std::getline(std::cin, title);
-		}
+	std::getline(std::cin >> std::ws, title);
+	while (title.empty()) {
+		std::cout << "Название не может быть пустым!\nВведите название ещё раз: ";
+		std::getline(std::cin, title);
 	}
+
 	std::cout << "Издательство: ";
 	std::getline(std::cin, publisher);
 	if (publisher.empty()) {
-		std::cout << "Издательство неизвестно" << std::endl;
-		}
+		publisher = "Неизвестно";
+	}
+
 	std::cout << "Год издания: ";
 	while (!(std::cin >> year) || year < 0 || year > 2026) {
 		std::cout << "Ошибка! Введите корректный год (0-2026): ";
 		std::cin.clear();
 		std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
 	}
+
 	std::cout << "Количество экземпляров: ";
 	while (!(std::cin >> copies) || copies == 0) {
 		std::cout << "Ошибка! Введите положительное число: ";
 		std::cin.clear();
 		std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
 	}
+
 	return Book(next_book_id++, title, publisher, year, copies);
 }
 
-Reader LibraryManager::input_reader_from_console() {
-	std::string name, library_card;
+Reader LibraryManager::input_reader_from_console() const {
+	std::string name;
+	std::string library_card;
+
 	std::cout << "\nВведите данные читателя" << std::endl;
-	std::cin.ignore();
 	std::cout << "Имя читателя: ";
-	std::getline(std::cin, name);
-	if (name.empty()) {
+	std::getline(std::cin >> std::ws, name);
+	while (name.empty()) {
 		std::cout << "Имя не может быть пустым! Введите заново: ";
 		std::getline(std::cin, name);
 	}
+
 	std::cout << "Номер читательского билета: ";
 	std::getline(std::cin, library_card);
 	if (library_card.empty()) {
 		library_card = "Не указан";
 	}
+
 	return Reader(name, library_card);
 }
 
-void LibraryManager::add_book(const std::string& title, const std::string& publisher,int year, unsigned short copies) {
-	books.emplace_back(Book(next_book_id++, title, publisher, year, copies));
+void LibraryManager::add_book(const std::string& title, const std::string& publisher, int year, unsigned short copies) {
+	books.emplace_back(next_book_id++, title, publisher, year, copies);
 }
 
 void LibraryManager::add_book_from_console() {
 	Book new_book = input_book_from_console();
 	books.push_back(new_book);
-	std::cout << "Книга \"" << new_book.get_title() << "\" добавлена! (ID: "<< new_book.get_id() << ")" << std::endl;
+	std::cout << "Книга \"" << new_book.get_title() << "\" добавлена! (ID: " << new_book.get_id() << ")" << std::endl;
 }
 
 void LibraryManager::show_all_books() const {
@@ -78,32 +85,32 @@ void LibraryManager::show_all_books() const {
 	}
 }
 
-Book* LibraryManager::find_book_by_id(int id) const {
-	for (const auto& book : books) {
+Book* LibraryManager::find_book_by_id(int id) {
+	for (auto& book : books) {
 		if (book.get_id() == id) {
-			return const_cast<Book*>(&book);
+			return &book;
 		}
 	}
 	return nullptr;
 }
 
-Book* LibraryManager::find_book_by_title(const std::string& title) const {
-	for (const auto& book : books) {
+Book* LibraryManager::find_book_by_title(std::string_view title) {
+	for (auto& book : books) {
 		if (book.get_title() == title) {
-			return const_cast<Book*>(&book);
+			return &book;
 		}
 	}
 	return nullptr;
 }
 
 void LibraryManager::add_reader(const std::string& name, const std::string& library_card) {
-	readers.emplace_back(Reader(name, library_card));
+	readers.emplace_back(name, library_card);
 }
 
 void LibraryManager::add_reader_from_console() {
 	Reader new_reader = input_reader_from_console();
 	readers.push_back(new_reader);
-	std::cout << "Читатель \"" << new_reader.get_name()<< "\" зарегистрирован. (Билет: " << new_reader.get_library_card() << ")" << std::endl;
+	std::cout << "Читатель \"" << new_reader.get_name() << "\" зарегистрирован. (Билет: " << new_reader.get_library_card() << ")" << std::endl;
 }
 
 void LibraryManager::show_all_readers() const {
@@ -118,19 +125,28 @@ void LibraryManager::show_all_readers() const {
 	}
 }
 
-Reader* LibraryManager::find_reader_by_card(const std::string& library_card) const {
-	for (const auto& reader : readers) {
+Reader* LibraryManager::find_reader_by_card(std::string_view library_card) {
+	for (auto& reader : readers) {
 		if (reader.get_library_card() == library_card) {
-			return const_cast<Reader*>(&reader);
+			return &reader;
 		}
 	}
 	return nullptr;
 }
 
-Reader* LibraryManager::find_reader_by_name(const std::string& name) const {
+const Reader* LibraryManager::find_reader_by_card(std::string_view library_card) const {
+	for (const auto& reader : readers) {
+		if (reader.get_library_card() == library_card) {
+			return &reader;
+		}
+	}
+	return nullptr;
+}
+
+const Reader* LibraryManager::find_reader_by_name(std::string_view name) const {
 	for (const auto& reader : readers) {
 		if (reader.get_name() == name) {
-			return const_cast<Reader*>(&reader);
+			return &reader;
 		}
 	}
 	return nullptr;
@@ -147,6 +163,7 @@ bool LibraryManager::borrow_book(const std::string& library_card, int book_id) {
 			<< "\" уже взял книгу! (ID: " << reader->get_borrowed_book_id() << ")" << std::endl;
 		return false;
 	}
+
 	Book* book = find_book_by_id(book_id);
 	if (!book) {
 		std::cout << "Ошибка: книга с ID " << book_id << " не найдена!" << std::endl;
@@ -159,7 +176,7 @@ bool LibraryManager::borrow_book(const std::string& library_card, int book_id) {
 	}
 	if (book->borrow()) {
 		reader->borrow_book(book_id);
-		std::cout << "Книга \"" << book->get_title()<< "\" выдана читателю \"" << reader->get_name() << "\"" << std::endl;
+		std::cout << "Книга \"" << book->get_title() << "\" выдана читателю \"" << reader->get_name() << "\"" << std::endl;
 		return true;
 	}
 	return false;
@@ -190,17 +207,18 @@ bool LibraryManager::return_book(const std::string& library_card) {
 }
 
 int LibraryManager::get_books_count() const {
-	return books.size();
+	return static_cast<int>(books.size());
 }
 
 int LibraryManager::get_readers_count() const {
-	return readers.size();
+	return static_cast<int>(readers.size());
 }
 
 void LibraryManager::clear_all_data() {
 	books.clear();
 	readers.clear();
 	next_book_id = 1;
+	next_reader_id = 1;
 	std::cout << "Все данные очищены!" << std::endl;
 }
 
@@ -238,14 +256,17 @@ bool LibraryManager::edit_reader(const std::string& library_card) {
 	reader->print_info();
 	std::cout << "\nЧто хотите изменить?\n1. Имя читателя\n2. Номер читательского билета\n0. Отмена" << std::endl;
 	int choice;
-	std::cin >> choice;
-	std::cin.ignore();
+	if (!(std::cin >> choice)) {
+		std::cin.clear();
+		std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
+		return false;
+	}
 
 	switch (choice) {
 	case 1: {
 		std::string new_name;
 		std::cout << "Введите новое имя: ";
-		std::getline(std::cin, new_name);
+		std::getline(std::cin >> std::ws, new_name);
 
 		if (new_name.empty()) {
 			std::cout << "Ошибка: имя не может быть пустым!" << std::endl;
@@ -258,7 +279,7 @@ bool LibraryManager::edit_reader(const std::string& library_card) {
 	case 2: {
 		std::string new_card;
 		std::cout << "Введите новый номер билета: ";
-		std::getline(std::cin, new_card);
+		std::getline(std::cin >> std::ws, new_card);
 		if (new_card.empty()) {
 			std::cout << "Ошибка: номер билета не может быть пустым!" << std::endl;
 			return false;
