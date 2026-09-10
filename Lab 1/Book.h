@@ -13,21 +13,22 @@ private:
 
 public:
 	Book(int id, const std::string& title, const std::string& publisher, int year, unsigned short copies);
-
+	//геттеры
 	std::string get_title() const;
 	std::string get_publisher() const;
 	int get_id() const;
 	int get_year() const;
 	unsigned short get_copies() const;
-
+	//сеттеры
 	void set_title(std::string_view new_title);      
 	void set_publisher(std::string_view new_publisher);
 	void set_id(int new_id);
 	void set_year(int new_year);
 	void set_copies(unsigned short new_copies);
-
+	//флаги
 	bool is_available() const;
 	bool borrow();
+	//доп методы
 	void return_copy();
 	void print_info() const;
 };

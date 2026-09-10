@@ -1,7 +1,7 @@
 #include "Reader.h"
 
 Reader::Reader(const std::string& name, const std::string& library_card,int borrowed_book_id, bool has_book) : name(name), library_card(library_card), borrowed_book_id(borrowed_book_id), has_book(has_book) {}
-
+//геттеры
 std::string Reader::get_name() const {
 	return name;
 }
@@ -17,7 +17,7 @@ int Reader::get_borrowed_book_id() const {
 bool Reader::get_has_book() const {
 	return has_book;
 }
-
+//сеттеры
 void Reader::set_name(std::string_view new_name) {
 	if (!new_name.empty()) {
 		name = new_name;
@@ -43,14 +43,14 @@ void Reader::set_has_book(bool status) {
 		borrowed_book_id = 0;
 	}
 }
-
+//доп функции
 void Reader::borrow_book(int book_id) {
 	if (!has_book && book_id > 0) {
 		borrowed_book_id = book_id;
 		has_book = true;
 	}
 }
-
+//флаги
 bool Reader::return_book() {
 	if (has_book) {
 		has_book = false;
