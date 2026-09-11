@@ -5,7 +5,9 @@
 #include "Reader.h"
 
 class LibraryManager {
+
 private:
+
 	std::vector<Book> books;
 	std::vector<Reader> readers;
 	int next_book_id;
@@ -15,6 +17,7 @@ private:
 	Reader input_reader_from_console() const;
 
 public:
+
 	LibraryManager();
 	//работа с книгами
 	void add_book(const std::string& title, const std::string& publisher, int year, unsigned short copies);

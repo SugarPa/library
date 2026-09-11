@@ -5,15 +5,12 @@ Reader::Reader(const std::string& name, const std::string& library_card,int borr
 std::string Reader::get_name() const {
 	return name;
 }
-
 std::string Reader::get_library_card() const {
 	return library_card;
 }
-
 int Reader::get_borrowed_book_id() const {
 	return borrowed_book_id;
 }
-
 bool Reader::get_has_book() const {
 	return has_book;
 }
@@ -23,20 +20,17 @@ void Reader::set_name(std::string_view new_name) {
 		name = new_name;
 	}
 }
-
 void Reader::set_library_card(std::string_view new_library_card) {
 	if (!new_library_card.empty()) {
 		library_card = new_library_card;
 	}
 }
-
 void Reader::set_borrowed_book_id(int new_id) {
 	if (new_id>0) {
 		borrowed_book_id=new_id;
 		has_book = true;
 	}
 }
-
 void Reader::set_has_book(bool status) {
 	has_book = status;
 	if (!status) {
@@ -59,11 +53,9 @@ bool Reader::return_book() {
 	}
 	return false;
 }
-
 bool Reader::has_book_now() const{
 	return has_book;
 }
-
 void Reader::print_info() const {
 	std::cout << "Имя " << name
 		<< ",Билет: " << library_card;

@@ -5,19 +5,15 @@ Book::Book(int id, const std::string& title, const std::string& publisher, int y
 std::string Book::get_publisher() const {
 	return publisher;
 }
-
 std::string Book::get_title() const {
 	return title;
 }
-
 int Book::get_id() const {
 	return id;
 }
-
 int Book::get_year() const {
 	return year;
 }
-
 unsigned short Book::get_copies() const {
 	return copies;
 }
@@ -27,25 +23,21 @@ void Book::set_title(std::string_view new_title) {
 		title = new_title;
 	}
 }
-
 void Book::set_publisher(std::string_view new_publisher) {
 	if (!new_publisher.empty()) {
 		publisher = new_publisher;
 	}
 }
-
 void Book::set_id(int new_id) {
 	if (new_id>=0) {
 		id = new_id;
 	}
 }
-
 void Book::set_year(int new_year) {
 	if (new_year>= 0) {
 		year = new_year;
 	}
 }
-
 void Book::set_copies(unsigned short new_copies) {
 	copies = new_copies;
 }
@@ -53,7 +45,6 @@ void Book::set_copies(unsigned short new_copies) {
 bool Book::is_available() const {
 	return copies > 0;
 }
-
 bool Book::borrow() {
 	if (copies > 0) {
 		copies--;
@@ -65,7 +56,6 @@ bool Book::borrow() {
 void Book::return_copy() {
 	copies++;
 }
-
 void Book::print_info() const {
 	std::cout << "ID: " << id
 		<< ", Название: \"" << title << "\""

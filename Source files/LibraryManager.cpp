@@ -159,8 +159,7 @@ bool LibraryManager::borrow_book(const std::string& library_card, int book_id) {
 		return false;
 	}
 	if (reader->has_book_now()) {
-		std::cout << "Ошибка: читатель \"" << reader->get_name()
-			<< "\" уже взял книгу! (ID: " << reader->get_borrowed_book_id() << ")" << std::endl;
+		std::cout << "Ошибка: читатель \"" << reader->get_name() << "\" уже взял книгу! (ID: " << reader->get_borrowed_book_id() << ")" << std::endl;
 		return false;
 	}
 
@@ -170,8 +169,7 @@ bool LibraryManager::borrow_book(const std::string& library_card, int book_id) {
 		return false;
 	}
 	if (!book->is_available()) {
-		std::cout << "Ошибка: книга \"" << book->get_title()
-			<< "\" недоступна!" << std::endl;
+		std::cout << "Ошибка: книга \"" << book->get_title() << "\" недоступна!" << std::endl;
 		return false;
 	}
 	if (book->borrow()) {
