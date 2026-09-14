@@ -1,7 +1,6 @@
 #include "Book.h"
 
 Book::Book(int id, const std::string& title, const std::string& publisher, int year, unsigned short copies): title(title), publisher(publisher), id(id), year(year), copies(copies) {}
-//Геттеры
 std::string Book::get_publisher() const {
 	return publisher;
 }
@@ -17,7 +16,6 @@ int Book::get_year() const {
 unsigned short Book::get_copies() const {
 	return copies;
 }
-//сеттеры
 void Book::set_title(std::string_view new_title) {
 	if (!new_title.empty()) {
 		title = new_title;
@@ -41,7 +39,6 @@ void Book::set_year(int new_year) {
 void Book::set_copies(unsigned short new_copies) {
 	copies = new_copies;
 }
-//флаги
 bool Book::is_available() const {
 	return copies > 0;
 }
@@ -52,7 +49,6 @@ bool Book::borrow() {
 	}
 	return false;
 }
-//доп функции
 void Book::return_copy() {
 	copies++;
 }

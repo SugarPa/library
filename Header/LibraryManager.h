@@ -19,7 +19,6 @@ private:
 public:
 
 	LibraryManager();
-	//работа с книгами
 	void add_book(const std::string& title, const std::string& publisher, int year, unsigned short copies);
 	void add_book_from_console();
 	void show_all_books() const;
@@ -29,7 +28,6 @@ public:
 	bool return_book(const std::string& library_card);
 	Book* find_book_by_id(int id);
 	Book* find_book_by_title(std::string_view title);
-	//работа с читателями
 	void add_reader(const std::string& name, const std::string& library_card);
 	void add_reader_from_console();
 	bool edit_reader(const std::string& library_card);
@@ -38,6 +36,5 @@ public:
 	Reader* find_reader_by_card(std::string_view library_card);
 	const Reader* find_reader_by_card(std::string_view library_card) const;
 	const Reader* find_reader_by_name(std::string_view name) const;
-	//доп метод по очистке
 	void clear_all_data();
 };
