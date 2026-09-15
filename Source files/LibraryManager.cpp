@@ -3,6 +3,9 @@
 #include <limits>
 #include <algorithm>
 #include <string_view>
+#include <time.h>
+#include <ctime>
+#include <chrono>
 
 LibraryManager::LibraryManager() : next_book_id(1), next_reader_id(1) {}
 
@@ -27,7 +30,12 @@ Book LibraryManager::input_book_from_console() {
 	}
 
 	std::cout << "Год издания: ";
-	while (!(std::cin >> year) || year < 0 || year > 2026) {
+	auto now = std::chrono::system_clock::now();
+	std::time_t t = std::chrono::system_clock::to_time_t(now);
+	std::tm local_time;
+	localtime_s(&local_time, &t);
+	int this_year = local_time.tm_year + 1900;
+	while (!(std::cin >> year) || year < 0 || year >this_year) {
 		std::cout << "Ошибка! Введите корректный год (0-2026): ";
 		std::cin.clear();
 		std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
