@@ -34,5 +34,8 @@ public:
 	LibraryManager& operator+=(const Book& book);
 	LibraryManager& operator+=(const Reader& reader);
 	LibraryManager& operator-=(int book_id);
+	void sort_books_by_year();
+	bool contains_book(const Book& book) const;
+	const Book* get_oldest_book() const;
 	friend void print_library_stats(const LibraryManager& manager);
 };

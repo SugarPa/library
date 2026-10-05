@@ -37,7 +37,12 @@ public:
     void return_copy();
 
     bool operator==(const Book& other) const { return id == other.id; }
-    auto operator<=>(const Book& other) const { return year <=> other.year; }
+    auto operator<=>(const Book& other) const {
+        if (auto cmp = year <=> other.year; cmp != 0) {
+            return cmp;
+        }
+        return id <=> other.id;
+    }
 
     friend std::ostream& operator<<(std::ostream& os, const Book& book) {
         os << "ID: " << book.id
@@ -53,7 +58,7 @@ public:
             is.ignore();
         }
 
-        std::cout << "\n=== Ввод данных книги ===" << std::endl;
+        std::cout << "\nВвод данных книги" << std::endl;
 
         std::cout << "Введите название: ";
         std::getline(is >> std::ws, book.title);

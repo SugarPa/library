@@ -219,6 +219,24 @@ bool LibraryManager::edit_reader(const std::string& library_card) {
     }
 }
 
+void LibraryManager::sort_books_by_year() {
+    std::sort(books.begin(), books.end());
+    std::cout << "Книги успешно отсортированы по году издания!\n";
+}
+
+bool LibraryManager::contains_book(const Book& book) const {
+    return std::ranges::any_of(books, [&book](const Book& b) {
+        return b == book;
+        });
+}
+
+const Book* LibraryManager::get_oldest_book() const {
+    if (books.empty()) return nullptr;
+
+    auto it = std::min_element(books.begin(), books.end());
+    return std::to_address(it);
+}
+
 void print_library_stats(const LibraryManager& manager) {
     int total_copies = 0;
     int readers_with_books = 0;
