@@ -1,4 +1,5 @@
 #include "LibraryManager.h"
+#include "Book.h"
 #include <iostream>
 #include <limits>
 #include <algorithm>
@@ -220,7 +221,9 @@ bool LibraryManager::edit_reader(const std::string& library_card) {
 }
 
 void LibraryManager::sort_books_by_year() {
-    std::sort(books.begin(), books.end());
+    std::sort(books.begin(), books.end(), [](const Book& a, const Book& b) {
+        return a < b;
+        });
     std::cout << "Книги успешно отсортированы по году издания!\n";
 }
 

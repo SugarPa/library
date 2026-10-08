@@ -38,10 +38,7 @@ public:
 
     bool operator==(const Book& other) const { return id == other.id; }
     auto operator<=>(const Book& other) const {
-        if (auto cmp = year <=> other.year; cmp != 0) {
-            return cmp;
-        }
-        return id <=> other.id;
+        return year <=> other.year;
     }
 
     friend std::ostream& operator<<(std::ostream& os, const Book& book) {
