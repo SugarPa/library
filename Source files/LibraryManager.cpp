@@ -6,6 +6,10 @@
 
 LibraryManager::LibraryManager() : next_book_id(1), next_reader_id(1) {}
 LibraryManager& LibraryManager::operator+=(const Book& book) {
+    if (contains_book(book)) {
+        std::cout << "Предупреждение: Книга с таким ID уже есть в библиотеке!\n";
+        return *this;
+    }
     Book copy = book;
     if (copy.get_id() == 0) {
         copy.set_id(next_book_id++);

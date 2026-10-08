@@ -36,7 +36,9 @@ public:
     bool borrow();
     void return_copy();
 
-    bool operator==(const Book& other) const { return id == other.id; }
+    bool operator==(const Book& other) const { 
+        return id == other.id; 
+    }
     auto operator<=>(const Book& other) const {
         return year <=> other.year;
     }

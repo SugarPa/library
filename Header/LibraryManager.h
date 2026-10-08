@@ -38,4 +38,5 @@ public:
 	bool contains_book(const Book& book) const;
 	const Book* get_oldest_book() const;
 	friend void print_library_stats(const LibraryManager& manager);
+	std::vector<Book> find_books_by_same_publisher(const Book& sample) const;
 };
