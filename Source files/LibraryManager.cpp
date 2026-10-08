@@ -228,7 +228,6 @@ void LibraryManager::sort_books_by_year() {
     std::sort(books.begin(), books.end(), [](const Book& a, const Book& b) {
         return a < b;
         });
-    std::cout << "Книги успешно отсортированы по году издания!\n";
 }
 
 bool LibraryManager::contains_book(const Book& book) const {
