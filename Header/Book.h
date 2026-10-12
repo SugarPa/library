@@ -17,8 +17,9 @@ private:
 
 public:
     Book() : id(0), year(0), copies(0) {}
-
     Book(int id, const std::string& title, const std::string& publisher, int year, unsigned short copies);
+
+    virtual ~Book() = default;
 
     std::string get_title() const;
     std::string get_publisher() const;
@@ -36,22 +37,21 @@ public:
     bool borrow();
     void return_copy();
 
-    bool operator==(const Book& other) const { 
-        return id == other.id; 
+    virtual void print_info() const;
+
+    bool operator==(const Book& other) const {
+        return id == other.id;
     }
     auto operator<=>(const Book& other) const {
         return year <=> other.year;
     }
 
     friend std::ostream& operator<<(std::ostream& os, const Book& book) {
-        os << "ID: " << book.id
-            << ", Название: \"" << book.title << "\""
-            << ", Год: " << book.year
-            << ", Издательство: " << book.publisher
-            << ", Доступно: " << book.copies << " экз.";
+        book.print_info();
         return os;
     }
 
+    // Скрытый друг (hidden friend) — определяем прямо здесь
     friend std::istream& operator>>(std::istream& is, Book& book) {
         if (is.peek() == '\n') {
             is.ignore();
