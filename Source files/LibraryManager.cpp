@@ -105,14 +105,6 @@ LibraryManager& LibraryManager::operator+=(const Reader& reader) {
     return *this;
 }
 
-LibraryManager& LibraryManager::operator-=(const Book& book) {
-    std::erase_if(books, [&book](const auto& ptr) {
-        return ptr->get_id() == book.get_id();
-        });
-    std::cout << "Книга удалена из библиотеки." << std::endl;
-    return *this;
-}
-
 void LibraryManager::show_all_books() const {
     if (books.empty()) {
         std::cout << "Библиотека пуста." << std::endl;
@@ -271,6 +263,18 @@ bool LibraryManager::borrow_book(const std::string& library_card, int book_id) {
     reader->borrow_book(book_id);
     std::cout << "Книга успешно выдана!" << std::endl;
     return true;
+}
+
+void LibraryManager::remove_book(const Book& book) {
+    std::erase_if(books, [&book](const auto& ptr) {
+        return ptr->get_id() == book.get_id();
+        });
+    std::cout << "Книга удалена из библиотеки." << std::endl;
+}
+
+LibraryManager& LibraryManager::operator-=(const Book& book) {
+    remove_book(book);
+    return *this;
 }
 
 bool LibraryManager::return_book(const std::string& library_card) {

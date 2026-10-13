@@ -19,6 +19,7 @@ public:
     void add_book_from_console();
     void show_all_books() const;
     int get_books_count() const;
+    void remove_book(const Book& book);
 
     bool borrow_book(const std::string& library_card, int book_id);
     bool return_book(const std::string& library_card);
