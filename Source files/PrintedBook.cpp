@@ -12,4 +12,9 @@ int PrintedBook::get_page_count() const {
 void PrintedBook::print_info() const {
     Book::print_info();
     std::cout << ", Тип: Бумажная, Страниц: " << page_count;
+
+}
+
+double PrintedBook::calculate_weight_grams() const {
+    return page_count * 5.5;
 }

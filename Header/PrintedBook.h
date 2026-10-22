@@ -11,4 +11,5 @@ public:
 
     int get_page_count() const;
     void print_info() const override;
+    double calculate_weight_grams() const;
 };

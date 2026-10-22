@@ -18,3 +18,9 @@ void AudioBook::print_info() const {
     std::cout << ", Тип: Аудиокнига, Длительность: " << duration_minutes
         << " мин., Чтец: " << narrator;
 }
+
+std::string AudioBook::duration_formatted() const {
+    int hours = duration_minutes / 60;
+    int minutes = duration_minutes % 60;
+    return std::format("{} ч. {} мин.", hours, minutes);
+}
