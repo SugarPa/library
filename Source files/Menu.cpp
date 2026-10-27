@@ -30,13 +30,11 @@ static void print_menu() {
         << "0. Выход\n\nВыберите действие: ";
 }
 
-// Вспомогательная функция для специфичных действий с дочерними классами книг (пункты 16-18)
 static void handle_specific_book_action(LibraryManager& library, int choice) {
     int id;
     std::cout << "Введите ID книги: ";
     std::cin >> id;
 
-    // Исправлено S5350: используем const Book* чтобы удовлетворить анализатор
     const Book* book = library.find_book_by_id(id);
     if (!book) {
         std::cout << "Книга с ID " << id << " не найдена!" << std::endl;
@@ -76,7 +74,6 @@ static void handle_specific_book_action(LibraryManager& library, int choice) {
     }
 }
 
-// Вспомогательная функция для работы с читателями (пункты 5-9, 13)
 static void handle_reader_action(LibraryManager& library, int choice) {
     switch (choice) {
     case 5:
