@@ -51,7 +51,6 @@ public:
         return os;
     }
 
-    // Скрытый друг (hidden friend) — определяем прямо здесь
     friend std::istream& operator>>(std::istream& is, Book& book) {
         if (is.peek() == '\n') {
             is.ignore();
