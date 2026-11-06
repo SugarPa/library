@@ -46,6 +46,6 @@ public:
     void sort_books_by_year();
     bool contains_book(const Book& book) const;
     const Book* get_oldest_book() const;
-
+    void show_detailed_inf() const;
     friend void print_library_stats(const LibraryManager& manager);
 };

@@ -15,11 +15,15 @@ private:
     int year;
     unsigned short copies;
 
-public:
+protected:
     Book() : id(0), year(0), copies(0) {}
     Book(int id, const std::string& title, const std::string& publisher, int year, unsigned short copies);
 
+public:
     virtual ~Book() = default;
+    virtual std::string get_type_name() const = 0;
+    virtual void print_info() const = 0;
+    virtual double get_specific_value() const = 0;
 
     std::string get_title() const;
     std::string get_publisher() const;
@@ -36,8 +40,6 @@ public:
     bool is_available() const;
     bool borrow();
     void return_copy();
-
-    virtual void print_info() const;
 
     bool operator==(const Book& other) const {
         return id == other.id;
@@ -56,7 +58,7 @@ public:
             is.ignore();
         }
 
-        std::cout << "\nВвод данных книги" << std::endl;
+        std::cout << "\nВвод общих данных книги" << std::endl;
 
         std::cout << "Введите название: ";
         std::getline(is >> std::ws, book.title);

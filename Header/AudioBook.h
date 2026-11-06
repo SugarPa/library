@@ -13,5 +13,7 @@ public:
     int get_duration_minutes() const;
     std::string get_narrator() const;
     std::string duration_formatted() const;
+    std::string get_type_name() const override;
     void print_info() const override;
+    double get_specific_value() const override;
 };

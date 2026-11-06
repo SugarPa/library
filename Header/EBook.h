@@ -12,6 +12,8 @@ public:
 
     double get_file_size_mb() const;
     std::string get_format() const;
-    double calculate_download_time(double speed_mbps) const;
+    std::string get_type_name() const override;
     void print_info() const override;
+    double get_specific_value() const override;
+    double calculate_download_time(double speed_mbps) const;
 };

@@ -13,9 +13,17 @@ std::string EBook::get_format() const {
     return format;
 }
 
+std::string EBook::get_type_name() const {
+    return "Электронная книга";
+}
+
 void EBook::print_info() const {
     Book::print_info();
-    std::cout << ", Тип: Электронная книга, Формат: " << format << ", Размер: " << file_size_mb << " MB";
+    std::cout << ", Тип: " << get_type_name() << ", Формат: " << format << ", Размер: " << file_size_mb << " MB";
+}
+
+double EBook::get_specific_value() const {
+    return file_size_mb;
 }
 
 double EBook::calculate_download_time(double speed_mbps) const {

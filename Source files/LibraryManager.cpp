@@ -310,3 +310,20 @@ void print_library_stats(const LibraryManager& manager) {
     std::cout << "Читателей с книгами на руках: " << readers_with_books << std::endl;
     std::cout << "Следующий ID для книги: " << manager.next_book_id << std::endl;
 }
+
+void LibraryManager::show_detailed_inf() const {
+    if (books.empty()) {
+        std::cout << "Библиотека пустая" << std::endl;
+        return;
+    }
+
+    for (const auto& book_ptr : books) {
+        const Book& book_ref = *book_ptr;
+
+        std::cout << "\tИмя типа: " << book_ref.get_type_name() << std::endl;
+        std::cout << "Информация:    ";
+        book_ref.print_info();
+        std::cout << std::endl;
+        std::cout << "Специфическое значение: " << book_ref.get_specific_value() << " (для бумажной — вес в г., для эл. — размер в МБ, для аудио — мин.)" << std::endl;
+    }
+}

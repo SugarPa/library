@@ -27,6 +27,7 @@ static void print_menu() {
         << "16. Рассчитать вес бумажной книги\n"
         << "17. Рассчитать время скачивания электронной книги\n"
         << "18. Показать отформатированную длительность аудиокниги\n"
+        << "19. Демонстрация динамического полиморфизма\n"
         << "0. Выход\n\nВыберите действие: ";
 }
 
@@ -228,6 +229,9 @@ void run_menu() {
         case 17:
         case 18:
             handle_specific_book_action(library, choice);
+            break;
+        case 19:
+            library.show_detailed_inf();
             break;
         case 0:
             std::cout << "Выход из программы." << std::endl;
