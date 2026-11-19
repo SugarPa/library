@@ -28,10 +28,15 @@ static void print_menu() {
         << "17. Рассчитать время скачивания электронной книги\n"
         << "18. Показать отформатированную длительность аудиокниги\n"
         << "19. Показать дополненную информацию про книги\n"
+        << "20. Найти книги начиная с указанного года\n"
+        << "21. Показать читателей по статусу выдачи (с книгой / без книги)\n"
+        << "22. Пополнить экземпляры книг в наличии\n"
+        << "23. Показать журнал операций\n"
+        << "24. Найти читателя по имени или по ID выданной книги\n"
         << "0. Выход\n\nВыберите действие: ";
 }
 
-static void handle_specific_book_action(LibraryManager& library, int choice) {
+static void handle_specific_book_action(const LibraryManager& library, int choice) {
     int id;
     std::cout << "Введите ID книги: ";
     std::cin >> id;
@@ -124,6 +129,198 @@ static void handle_reader_action(LibraryManager& library, int choice) {
     }
 }
 
+static void handle_find_books_by_year(const LibraryManager& library) {
+    int min_year;
+    std::cout << "Введите минимальный год издания: ";
+    std::cin >> min_year;
+    if (auto found_books = library.find_books_from_year(min_year); found_books.empty()) {
+        std::cout << "Книг начиная с " << min_year << " года не найдено." << std::endl;
+    }
+    else {
+        std::cout << "\nНайдено книг (" << found_books.size() << "):\n";
+        for (const Book* b : found_books) {
+            b->print_info();
+            std::cout << std::endl;
+        }
+    }
+}
+
+static void handle_find_readers_by_status(const LibraryManager& library) {
+    int status_choice;
+    std::cout << "1 — читатели с книгой на руках\n2 — читатели без книг\nВыбор: ";
+    std::cin >> status_choice;
+    bool with_book = (status_choice == 1);
+    if (auto matched = library.find_readers_with_books(with_book); matched.empty()) {
+        std::cout << "Подходящих читателей не найдено." << std::endl;
+    }
+    else {
+        std::cout << "\nНайдено читателей (" << matched.size() << "):\n";
+        for (const Reader* r : matched) {
+            std::cout << *r << std::endl;
+        }
+    }
+}
+
+static void handle_find_reader_by_criterion(const LibraryManager& library) {
+    int mode;
+    std::cout << "1 — поиск по имени\n2 — поиск по ID выданной книги\nВыбор: ";
+    std::cin >> mode;
+
+    if (mode == 1) {
+        std::string name;
+        std::cout << "Введите имя читателя: ";
+        std::getline(std::cin >> std::ws, name);
+        if (auto found = library.find_readers_by_name(name); found.empty()) {
+            std::cout << "Читатели с именем \"" << name << "\" не найдены." << std::endl;
+        }
+        else {
+            std::cout << "\nНайдено читателей (" << found.size() << "):\n";
+            for (const Reader* r : found) {
+                std::cout << *r << std::endl;
+            }
+        }
+    }
+    else if (mode == 2) {
+        int book_id;
+        std::cout << "Введите ID книги: ";
+        std::cin >> book_id;
+        if (auto found = library.find_readers_by_borrowed_book_id(book_id); found.empty()) {
+            std::cout << "Читателей с выданной книгой ID " << book_id << " не найдено." << std::endl;
+        }
+        else {
+            std::cout << "\nНайдено читателей (" << found.size() << "):\n";
+            for (const Reader* r : found) {
+                std::cout << *r << std::endl;
+            }
+        }
+    }
+    else {
+        std::cout << "Неверный критерий поиска!" << std::endl;
+    }
+}
+
+static void handle_delete_book(LibraryManager& library) {
+    int book_id;
+    std::cout << "Введите ID книги для удаления: ";
+    std::cin >> book_id;
+    const Book* book_ptr = library.find_book_by_id(book_id);
+    if (!book_ptr) {
+        std::cout << "Ошибка: книга не найдена!" << std::endl;
+        return;
+    }
+    if (library.is_book_borrowed(book_id)) {
+        std::cout << "Книгу нельзя удалить, она на руках у читателя!" << std::endl;
+        return;
+    }
+    library -= *book_ptr;
+}
+
+static void handle_menu_choice(LibraryManager& library, int choice) {
+    switch (choice) {
+    case 1:
+        library.add_book_from_console();
+        break;
+    case 2:
+        library.show_all_books();
+        break;
+    case 3: {
+        int id;
+        std::cout << "Введите ID книги: ";
+        std::cin >> id;
+        if (const Book* book = library.find_book_by_id(id); book) {
+            std::cout << "\nНайдена книга:\n";
+            book->print_info();
+            std::cout << std::endl;
+        }
+        else {
+            std::cout << "Книга с ID " << id << " не найдена!" << std::endl;
+        }
+        break;
+    }
+    case 4: {
+        std::string title;
+        std::cout << "Введите название книги: ";
+        std::getline(std::cin >> std::ws, title);
+        if (const Book* book = library.find_book_by_title(title); book) {
+            std::cout << "\nНайдена книга:\n";
+            book->print_info();
+            std::cout << std::endl;
+        }
+        else {
+            std::cout << "Книга \"" << title << "\" не найдена!" << std::endl;
+        }
+        break;
+    }
+    case 5:
+    case 6:
+    case 7:
+    case 8:
+    case 9:
+    case 13:
+        handle_reader_action(library, choice);
+        break;
+    case 10:
+        print_library_stats(library);
+        break;
+    case 11:
+        library.clear_all_data();
+        break;
+    case 12:
+        handle_delete_book(library);
+        break;
+    case 14:
+        library.sort_books_by_year();
+        std::cout << "Книги отсортированы по году издания." << std::endl;
+        library.show_all_books();
+        break;
+    case 15: {
+        if (const Book* oldest = library.get_oldest_book(); oldest != nullptr) {
+            std::cout << "\nСамая старая книга:\n";
+            oldest->print_info();
+            std::cout << std::endl;
+        }
+        else {
+            std::cout << "Библиотека пуста!" << std::endl;
+        }
+        break;
+    }
+    case 16:
+    case 17:
+    case 18:
+        handle_specific_book_action(library, choice);
+        break;
+    case 19:
+        library.show_detailed_inf();
+        break;
+    case 20:
+        handle_find_books_by_year(library);
+        break;
+    case 21:
+        handle_find_readers_by_status(library);
+        break;
+    case 22: {
+        unsigned short add_copies;
+        std::cout << "На сколько увеличить количество экземпляров для книг в наличии: ";
+        std::cin >> add_copies;
+        std::size_t updated = library.restock_available_books(add_copies);
+        std::cout << "Обновлено наименований книг: " << updated << std::endl;
+        break;
+    }
+    case 23:
+        library.show_operation_log();
+        break;
+    case 24:
+        handle_find_reader_by_criterion(library);
+        break;
+    case 0:
+        std::cout << "Выход из программы." << std::endl;
+        break;
+    default:
+        std::cout << "Неверный выбор!" << std::endl;
+        break;
+    }
+}
+
 void run_menu() {
     LibraryManager library;
     int choice;
@@ -131,9 +328,9 @@ void run_menu() {
     library += std::make_unique<EBook>(2, "C++ Primer", "Addison-Wesley", 2013, 2, 5.4, "PDF");
     library += std::make_unique<AudioBook>(3, "The Hobbit", "HarperAudio", 1937, 4, 650, "Rob Inglis");
 
-    library += Reader("Иван Петров", "B-001");
-    library += Reader("Мария Смирнова", "B-002");
-    library += Reader("Алексей Иванов", "B-003");
+    library += Reader("Ivan Petrov", "B-001");
+    library += Reader("Mariah Smernova", "B-002");
+    library += Reader("Alexey Vorobiev", "B-003");
 
     do {
         print_menu();
@@ -144,101 +341,6 @@ void run_menu() {
             continue;
         }
 
-        switch (choice) {
-        case 1:
-            library.add_book_from_console();
-            break;
-        case 2:
-            library.show_all_books();
-            break;
-        case 3: {
-            int id;
-            std::cout << "Введите ID книги: ";
-            std::cin >> id;
-            if (const Book* book = library.find_book_by_id(id); book) {
-                std::cout << "\nНайдена книга:\n";
-                book->print_info();
-                std::cout << std::endl;
-            }
-            else {
-                std::cout << "Книга с ID " << id << " не найдена!" << std::endl;
-            }
-            break;
-        }
-        case 4: {
-            std::string title;
-            std::cout << "Введите название книги: ";
-            std::getline(std::cin >> std::ws, title);
-            if (const Book* book = library.find_book_by_title(title); book) {
-                std::cout << "\nНайдена книга:\n";
-                book->print_info();
-                std::cout << std::endl;
-            }
-            else {
-                std::cout << "Книга \"" << title << "\" не найдена!" << std::endl;
-            }
-            break;
-        }
-        case 5:
-        case 6:
-        case 7:
-        case 8:
-        case 9:
-        case 13:
-            handle_reader_action(library, choice);
-            break;
-        case 10:
-            print_library_stats(library);
-            break;
-        case 11:
-            library.clear_all_data();
-            break;
-        case 12: {
-            int book_id;
-            std::cout << "Введите ID книги для удаления: ";
-            std::cin >> book_id;
-            const Book* book_ptr = library.find_book_by_id(book_id);
-            if (!book_ptr) {
-                std::cout << "Ошибка: книга не найдена!" << std::endl;
-                break;
-            }
-            if (library.is_book_borrowed(book_id)) {
-                std::cout << "Книгу нельзя удалить, она на руках у читателя!" << std::endl;
-                break;
-            }
-            library -= *book_ptr;
-            break;
-        }
-        case 14:
-            library.sort_books_by_year();
-            std::cout << "Книги отсортированы по году издания." << std::endl;
-            library.show_all_books();
-            break;
-        case 15: {
-            if (const Book* oldest = library.get_oldest_book(); oldest != nullptr) {
-                std::cout << "\nСамая старая книга:\n";
-                oldest->print_info();
-                std::cout << std::endl;
-            }
-            else {
-                std::cout << "Библиотека пуста!" << std::endl;
-            }
-            break;
-        }
-        case 16:
-        case 17:
-        case 18:
-            handle_specific_book_action(library, choice);
-            break;
-        case 19:
-            library.show_detailed_inf();
-            break;
-        case 0:
-            std::cout << "Выход из программы." << std::endl;
-            break;
-        default:
-            std::cout << "Неверный выбор!" << std::endl;
-            break;
-        }
+        handle_menu_choice(library, choice);
     } while (choice != 0);
 }

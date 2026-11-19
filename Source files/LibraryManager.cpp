@@ -5,20 +5,28 @@
 #include <iostream>
 #include <limits>
 #include <algorithm>
-#include <ranges>
 #include <chrono>
 #include <ctime>
+#include <format>
 
-LibraryManager::LibraryManager() : next_book_id(1), next_reader_id(1) {}
+LibraryManager::LibraryManager() : next_book_id(1) {}
+
+void LibraryManager::log_operation(const std::string& entry) {
+    operation_log.add(entry);
+}
 
 void LibraryManager::add_book(std::unique_ptr<Book> book) {
+    if (!book) return;
     if (book->get_id() == 0) {
         book->set_id(next_book_id++);
     }
     else if (book->get_id() >= next_book_id) {
         next_book_id = book->get_id() + 1;
     }
-    books.push_back(std::move(book));
+    std::string title = book->get_title();
+    int id = book->get_id();
+    books.add(std::move(book));
+    log_operation(std::format("Добавлена книга [ID={}] \"{}\"", id, title));
 }
 
 void LibraryManager::add_book_from_console() {
@@ -46,8 +54,12 @@ void LibraryManager::add_book_from_console() {
 
     auto now = std::chrono::system_clock::now();
     std::time_t t = std::chrono::system_clock::to_time_t(now);
-    std::tm local_time;
+    std::tm local_time{};
+#ifdef _WIN32
     localtime_s(&local_time, &t);
+#else
+    localtime_r(&t, &local_time);
+#endif
     int current_year = local_time.tm_year + 1900;
 
     std::cout << "Введите год издания (0-" << current_year << "): ";
@@ -101,7 +113,8 @@ LibraryManager& LibraryManager::operator+=(std::unique_ptr<Book> book) {
 }
 
 LibraryManager& LibraryManager::operator+=(const Reader& reader) {
-    readers.push_back(reader);
+    readers.add(reader);
+    log_operation(std::format("Зарегистрирован читатель: {} ({})", reader.get_name(), reader.get_library_card()));
     return *this;
 }
 
@@ -117,32 +130,60 @@ void LibraryManager::show_all_books() const {
     }
 }
 
-int LibraryManager::get_books_count() const {
-    return static_cast<int>(books.size());
+Book* LibraryManager::find_book_by_id(int id) {
+    const auto* const found = books.get_by_key(id, [](const std::unique_ptr<Book>& b) {
+        return b->get_id();
+        });
+    return found ? found->get() : nullptr;
 }
 
-Book* LibraryManager::find_book_by_id(int id) {
-    for (const auto& book_ptr : books) {
-        if (book_ptr->get_id() == id) {
-            return book_ptr.get();
-        }
-    }
-    return nullptr;
+const Book* LibraryManager::find_book_by_id(int id) const {
+    const auto* const found = books.get_by_key(id, [](const std::unique_ptr<Book>& b) {
+        return b->get_id();
+        });
+    return found ? found->get() : nullptr;
 }
 
 Book* LibraryManager::find_book_by_title(std::string_view title) {
-    for (const auto& book_ptr : books) {
-        if (book_ptr->get_title() == title) {
-            return book_ptr.get();
-        }
+    const auto* const found = books.find_if([title](const std::unique_ptr<Book>& b) {
+        return b->get_title() == title;
+        });
+    return found ? found->get() : nullptr;
+}
+
+std::vector<const Book*> LibraryManager::find_books_from_year(int min_year) const {
+    auto matches = find_all_by_criteria(books, [min_year](const std::unique_ptr<Book>& b) {
+        return b && b->get_year() >= min_year;
+        });
+
+    std::vector<const Book*> result;
+    result.reserve(matches.size());
+    for (const auto* ptr : matches) {
+        result.push_back(ptr->get());
     }
-    return nullptr;
+    return result;
+}
+
+std::size_t LibraryManager::restock_available_books(unsigned short add_copies) {
+    std::size_t updated = process_by_criteria(
+        books,
+        [](const std::unique_ptr<Book>& b) { return b && b->is_available(); },
+        [add_copies](const std::unique_ptr<Book>& b) {
+            b->set_copies(static_cast<unsigned short>(b->get_copies() + add_copies));
+        }
+    );
+    if (updated > 0) {
+        log_operation(std::format("Пополнено книг в наличии: {} (+{} экз.)", updated, add_copies));
+    }
+    return updated;
 }
 
 void LibraryManager::add_reader_from_console() {
     Reader r;
     std::cin >> r;
-    readers.push_back(r);
+    std::string info = std::format("{} ({})", r.get_name(), r.get_library_card());
+    readers.add(std::move(r));
+    log_operation(std::format("Добавлен читатель: {}", info));
     std::cout << "Читатель успешно добавлен!" << std::endl;
 }
 
@@ -160,6 +201,7 @@ bool LibraryManager::edit_reader(const std::string& library_card) {
         std::cout << "Новое имя: ";
         std::getline(std::cin >> std::ws, name);
         reader->set_name(name);
+        log_operation(std::format("Изменено имя читателя ({}) на \"{}\"", library_card, name));
         return true;
     }
     else if (choice == 2) {
@@ -167,52 +209,56 @@ bool LibraryManager::edit_reader(const std::string& library_card) {
         std::cout << "Новый билет: ";
         std::getline(std::cin >> std::ws, card);
         reader->set_library_card(card);
+        log_operation(std::format("Изменён номер билета читателя на \"{}\"", card));
         return true;
     }
     return false;
 }
 
-int LibraryManager::get_readers_count() const {
-    return static_cast<int>(readers.size());
+void LibraryManager::show_all_readers() const {
+    readers.print(std::cout, "Зарегистрированные читатели");
 }
 
-void LibraryManager::show_all_readers() const {
-    for (const auto& reader : readers) {
-        std::cout << reader << std::endl;
-    }
+std::vector<const Reader*> LibraryManager::find_readers_with_books(bool with_book) const {
+    return find_all_by_criteria(readers, [with_book](const Reader& r) {
+        return r.has_book_now() == with_book;
+        });
+}
+
+std::vector<const Reader*> LibraryManager::find_readers_by_name(std::string_view name) const {
+    return find_by_field(readers, [](const Reader& r) { return r.get_name(); }, std::string(name));
+}
+
+std::vector<const Reader*> LibraryManager::find_readers_by_borrowed_book_id(int book_id) const {
+    return find_by_field(readers, [](const Reader& r) { return r.get_borrowed_book_id(); }, book_id);
 }
 
 Reader* LibraryManager::find_reader_by_card(std::string_view library_card) {
-    for (auto& r : readers) {
-        if (r.get_library_card() == library_card) return &r;
-    }
-    return nullptr;
+    return readers.get_by_key(library_card, [](const Reader& r) {
+        return r.get_library_card();
+        });
 }
 
 const Reader* LibraryManager::find_reader_by_card(std::string_view library_card) const {
-    for (const auto& r : readers) {
-        if (r.get_library_card() == library_card) return &r;
-    }
-    return nullptr;
-}
-
-const Reader* LibraryManager::find_reader_by_name(std::string_view name) const {
-    for (const auto& r : readers) {
-        if (r.get_name() == name) return &r;
-    }
-    return nullptr;
+    return readers.get_by_key(library_card, [](const Reader& r) {
+        return r.get_library_card();
+        });
 }
 
 void LibraryManager::clear_all_data() {
     books.clear();
     readers.clear();
+    operation_log.clear();
     next_book_id = 1;
-    next_reader_id = 1;
     std::cout << "Все данные очищены!" << std::endl;
 }
 
+void LibraryManager::show_operation_log() const {
+    operation_log.print(std::cout, "Журнал операций библиотеки");
+}
+
 bool LibraryManager::is_book_borrowed(int book_id) const {
-    return std::ranges::any_of(readers, [book_id](const Reader& reader) {
+    return readers.contains_if([book_id](const Reader& reader) {
         return reader.get_borrowed_book_id() == book_id && reader.get_has_book();
         });
 }
@@ -221,12 +267,7 @@ void LibraryManager::sort_books_by_year() {
     std::sort(books.begin(), books.end(), [](const auto& a, const auto& b) {
         return a->get_year() < b->get_year();
         });
-}
-
-bool LibraryManager::contains_book(const Book& book) const {
-    return std::ranges::any_of(books, [&book](const auto& b) {
-        return *b == book;
-        });
+    log_operation("Выполнена сортировка книг по году издания");
 }
 
 const Book* LibraryManager::get_oldest_book() const {
@@ -261,14 +302,18 @@ bool LibraryManager::borrow_book(const std::string& library_card, int book_id) {
     }
     book->borrow();
     reader->borrow_book(book_id);
+    log_operation(std::format("Выдана книга ID={} читателю {}", book_id, library_card));
     std::cout << "Книга успешно выдана!" << std::endl;
     return true;
 }
 
 void LibraryManager::remove_book(const Book& book) {
-    std::erase_if(books, [&book](const auto& ptr) {
-        return ptr->get_id() == book.get_id();
+    int id = book.get_id();
+    std::string title = book.get_title();
+    books.remove_if([id](const auto& ptr) {
+        return ptr->get_id() == id;
         });
+    log_operation(std::format("Удалена книга [ID={}] \"{}\"", id, title));
     std::cout << "Книга удалена из библиотеки." << std::endl;
 }
 
@@ -288,26 +333,32 @@ bool LibraryManager::return_book(const std::string& library_card) {
         book->return_copy();
     }
     reader->return_book();
+    log_operation(std::format("Возвращена книга ID={} от читателя {}", book_id, library_card));
     std::cout << "Книга успешно возвращена в библиотеку!" << std::endl;
     return true;
 }
 
 void print_library_stats(const LibraryManager& manager) {
     int total_copies = 0;
-    int readers_with_books = 0;
-
     for (const auto& book_ptr : manager.books) {
         total_copies += book_ptr->get_copies();
     }
-    for (const auto& reader : manager.readers) {
-        if (reader.has_book_now()) readers_with_books++;
-    }
+
+    auto readers_with_books = find_all_by_criteria(manager.readers, [](const Reader& r) {
+        return r.has_book_now();
+        }).size();
+
+    auto available_books = find_all_by_criteria(manager.books, [](const std::unique_ptr<Book>& b) {
+        return b && b->is_available();
+        }).size();
 
     std::cout << "\n--- Статистика библиотеки ---" << std::endl;
     std::cout << "Количество наименований книг: " << manager.books.size() << std::endl;
+    std::cout << "Наименований в наличии: " << available_books << std::endl;
     std::cout << "Суммарно экземпляров на полках: " << total_copies << std::endl;
     std::cout << "Зарегистрировано читателей: " << manager.readers.size() << std::endl;
     std::cout << "Читателей с книгами на руках: " << readers_with_books << std::endl;
+    std::cout << "Записей в журнале операций: " << manager.operation_log.size() << std::endl;
     std::cout << "Следующий ID для книги: " << manager.next_book_id << std::endl;
 }
 
@@ -324,6 +375,7 @@ void LibraryManager::show_detailed_inf() const {
         std::cout << "Информация:    ";
         book_ref.print_info();
         std::cout << std::endl;
-        std::cout << "Специфическое значение: " << book_ref.get_specific_value() << " (для бумажной — вес в г., для эл. — размер в МБ, для аудио — мин.)" << std::endl;
+        std::cout << "Специфическое значение: " << book_ref.get_specific_value()
+            << " (для бумажной — вес в г., для эл. — размер в МБ, для аудио — мин.)" << std::endl;
     }
 }
